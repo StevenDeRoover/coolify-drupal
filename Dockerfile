@@ -1,31 +1,26 @@
 FROM php:8.3-apache
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        git unzip zip curl \
-        libicu-dev \
-        libpq-dev \
-        libzip-dev \
-        zlib1g-dev \
-        libpng-dev \
-        libjpeg-dev \
-        libfreetype6-dev \
-        ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git unzip zip curl \
+    libicu-dev libpq-dev libzip-dev zlib1g-dev \
+    libpng-dev libjpeg-dev libfreetype6-dev \
+    ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
 
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 RUN docker-php-ext-install \
-    bcmath \
-    intl \
-    gd \
-    pdo_pgsql \
-    pgsql \
-    zip \
-    opcache
+    bcmath intl gd pdo_pgsql pgsql zip opcache
 
 RUN a2enmod rewrite headers
 
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www/html
+
+RUN composer create-project drupal/recommended-project .
+
+# 👉 NU pas web root correct instellen
 ENV APACHE_DOCUMENT_ROOT /var/www/html/web
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
@@ -33,11 +28,6 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
  /etc/apache2/apache2.conf \
  /etc/apache2/conf-available/*.conf
 
-RUN mkdir -p sites/default/files/translations
-RUN chown -R www-data:www-data sites/default/files
-
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-
-WORKDIR /var/www/html
-
-RUN composer create-project drupal/recommended-project .
+# 👉 PAS NA composer want /web bestaat nu pas
+RUN mkdir -p /var/www/html/web/sites/default/files/translations \
+ && chown -R www-data:www-data /var/www/html/web/sites/default/files
