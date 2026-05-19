@@ -33,9 +33,8 @@ RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
  /etc/apache2/apache2.conf \
  /etc/apache2/conf-available/*.conf
 
- RUN mkdir -p /var/www/html/web/sites/default/files/translations \
- && mkdir -p /var/www/html/web/sites/default/files/tmp \
- && chown -R www-data:www-data /var/www/html/web/sites/default/files
+RUN mkdir -p sites/default/files/translations
+RUN chown -R www-data:www-data sites/default/files
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
