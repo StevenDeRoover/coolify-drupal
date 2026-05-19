@@ -19,15 +19,17 @@ WORKDIR /var/www/html
 RUN composer create-project drupal/recommended-project .
 
 # 👉 BELANGRIJK: pas NU bestaat /web
-RUN mkdir -p /var/www/html/web/sites/default/files/translations \
- && mkdir -p /var/www/html/web/sites/default/files/tmp \
- && chown -R www-data:www-data /var/www/html/
+RUN chown -R www-data:www-data /var/www/html/
  
- ENV APACHE_DOCUMENT_ROOT=/var/www/html/web
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/web
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
  /etc/apache2/sites-available/*.conf \
  /etc/apache2/apache2.conf \
  /etc/apache2/conf-available/*.conf
 
- USER www-data
+USER www-data
+
+COPY init.sh /init.sh 
+ENTRYPOINT ["/init.sh"]
+CMD ["apache2-foreground"]
