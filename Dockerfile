@@ -21,7 +21,7 @@ RUN composer create-project drupal/recommended-project .
 # 👉 BELANGRIJK: pas NU bestaat /web
 RUN mkdir -p /var/www/html/web/sites/default/files/translations \
  && mkdir -p /var/www/html/web/sites/default/files/tmp \
- && chown -R www-data:www-data /var/www/html/web
+ && chown -R www-data:www-data /var/www/html/
  
  ENV APACHE_DOCUMENT_ROOT=/var/www/html/web
 
