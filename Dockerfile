@@ -7,10 +7,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg
-
-RUN docker-php-ext-install \
-    bcmath intl gd pdo_pgsql pgsql zip opcache
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg && \
+    docker-php-ext-install bcmath intl gd pdo_pgsql pgsql zip opcache
 
 RUN a2enmod rewrite headers
 
@@ -20,14 +18,14 @@ WORKDIR /var/www/html
 
 RUN composer create-project drupal/recommended-project .
 
-# 👉 NU pas web root correct instellen
-ENV APACHE_DOCUMENT_ROOT /var/www/html/web
+# 👉 BELANGRIJK: pas NU bestaat /web
+RUN mkdir -p /var/www/html/web/sites/default/files/translations \
+ && mkdir -p /var/www/html/web/sites/default/files/tmp \
+ && chown -R www-data:www-data /var/www/html/web/sites/default/files
+
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/web
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
  /etc/apache2/sites-available/*.conf \
  /etc/apache2/apache2.conf \
  /etc/apache2/conf-available/*.conf
-
-# 👉 PAS NA composer want /web bestaat nu pas
-RUN mkdir -p /var/www/html/web/sites/default/files/translations \
- && chown -R www-data:www-data /var/www/html/web/sites/default/files
